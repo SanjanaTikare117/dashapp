@@ -1,7 +1,7 @@
-
 import glob
 import os
 import pandas as pd
+
 # Base class for data processing
 class DataProcessorBase:
     def __init__(self, dataset_name, directory, time_col, power_cols, voltage_cols=None):
@@ -52,6 +52,24 @@ class DataProcessorBase:
         print(f"Data processed for {self.dataset_name}.")
         return self.data
 
+    def save_to_feather(self, filename):
+        # Save processed data to Feather format
+        if self.data is not None:
+            self.data.reset_index(drop=True, inplace=True)
+            self.data.to_feather(filename)
+            print(f"Data saved to Feather format at {filename}.")
+        else:
+            print("No data available to save.")
+
+    def load_from_feather(self, filename):
+        # Load data from Feather file
+        if os.path.exists(filename):
+            df = pd.read_feather(filename)
+            print(f"Data loaded from Feather file at {filename}.")
+            return df
+        else:
+            print(f"Feather file not found at {filename}.")
+
 # Specialized class for processing power datasets
 class PowerDataProcessor(DataProcessorBase):
     def __init__(self, dataset_name, directory):
@@ -91,54 +109,58 @@ csa_voltage_df = csa_voltage.process_data()
 sm_voltage_df = sm_voltage.process_data()
 dese_voltage_df = dese_voltage.process_data()
 
+# Save processed data to Feather format
+csa_power.save_to_feather('./data/csa_power.feather')
+sm_power.save_to_feather('./data/sm_power.feather')
+dese_power.save_to_feather('./data/dese_power.feather')
+
+csa_voltage.save_to_feather('./data/csa_voltage.feather')
+sm_voltage.save_to_feather('./data/sm_voltage.feather')
+dese_voltage.save_to_feather('./data/dese_voltage.feather')
+
+# Example of accessing and loading processed Feather data
+csa_power.load_from_feather('./data/csa_power.feather')
+sm_power.load_from_feather('./data/sm_power.feather')
+dese_power.load_from_feather('./data/dese_power.feather')
+
+csa_voltage.load_from_feather('./data/csa_voltage.feather')
+sm_voltage.load_from_feather('./data/sm_voltage.feather')
+dese_voltage.load_from_feather('./data/dese_voltage.feather')
+
+
 # Example of accessing processed data
-if csa_power_df is not None:
+if csa_power.data is not None:
     print("CSA Power Data:")
-    print(csa_power_df.head())
+    print(csa_power.data.head())
 else:
     print("CSA Power data not available.")
 
-if sm_power_df is not None:
+if sm_power.data is not None:
     print("SM Power Data:")
-    print(sm_power_df.head())
-    sm_power_df.drop('Unnamed: 4', axis=1, inplace=True)
-    sm_power_df.dropna(inplace=True)
-    print(sm_power_df.columns)
+    print(sm_power.data.head())
 else:
     print("SM Power data not available.")
 
-if dese_power_df is not None:
+if dese_power.data is not None:
     print("DESE Power Data:")
-    print(dese_power_df.head())
+    print(dese_power.data.head())
 else:
     print("DESE Power data not available.")
 
-# Example of accessing processed voltage data
-if csa_voltage_df is not None:
+if csa_voltage.data is not None:
     print("CSA Voltage Data:")
-    # print(csa_voltage_df.columns)
-    print(csa_voltage_df.head())
-    csa_voltage_df.drop('Unnamed: 4', axis=1, inplace=True)
-    csa_voltage_df.dropna(inplace=True)
-    print(csa_voltage_df.columns)
-  
+    print(csa_voltage.data.head())
 else:
     print("CSA Voltage data not available.")
 
-if sm_voltage_df is not None:
+if sm_voltage.data is not None:
     print("SM Voltage Data:")
-    print(sm_voltage_df.columns)
-    print(sm_voltage_df.head())
-    sm_voltage_df.drop('Unnamed: 4', axis=1, inplace=True)
-    sm_voltage_df.dropna(inplace=True)
+    print(sm_voltage.data.head())
 else:
     print("SM Voltage data not available.")
 
-if dese_voltage_df is not None:
+if dese_voltage.data is not None:
     print("DESE Voltage Data:")
-    print(dese_voltage_df.columns)
-    print(dese_voltage_df.head())
-    dese_voltage_df.drop('Unnamed: 4', axis=1, inplace=True)
-    dese_voltage_df.dropna(inplace=True)
+    print(dese_voltage.data.head())
 else:
-    print("DESE Voltage data not available.")  
+    print("DESE Voltage data not available.")

@@ -1,5 +1,14 @@
 import pandas as pd
-from data_access.label_handler import get_labels
+# from label_handler import get_labels
+from typing import List
+# import pandas as pd
+
+def get_labels(df: pd.DataFrame) -> List[str]:
+    """Extract column labels from a DataFrame."""
+    if df is not None and not df.empty:
+        return df.columns.tolist()
+    return []
+
 
 def process_csa_power_data(csa_power_df: pd.DataFrame):
     """Process CSA power data and return labels and data."""
@@ -15,6 +24,10 @@ def process_csa_power_data(csa_power_df: pd.DataFrame):
             "CSA_A_Hour": csa_power_df['CSA_A_Hour'],
             "CSA_A_datetime": csa_power_df['CSA_A_datetime']
         })
+
+        df_csa_power["Total Active Power"]=df_csa_power["R_kW"]+df_csa_power["Y_kW"]+df_csa_power[ "B_kW"]
+        df_csa_power.drop(columns=['R_kW', 'Y_kW', 'B_kW'], inplace=True)
+        # return {df_csa_power.shape}
         json_output = df_csa_power.to_dict(orient="records")
         labels = get_labels(df_csa_power)  # Extract labels using the helper function
         return {"labels": labels, "data": json_output}
@@ -38,7 +51,12 @@ def process_dese_power_data(dese_power_df: pd.DataFrame):
             "DESE_A_Hour": dese_power_df['DESE_A_Hour'],
             "DESE_A_datetime": dese_power_df['DESE_A_datetime']
         })
+
+
+        df_dese_power["Total Active Power"]=df_dese_power["R_kW"]+df_dese_power["Y_kW"]+df_dese_power[ "B_kW"]
+        df_dese_power.drop(columns=['R_kW', 'Y_kW', 'B_kW'], inplace=True)
         json_output = df_dese_power.to_dict(orient="records")
+        return {df_dese_power.shape}
         labels = get_labels(df_dese_power)  # Extract labels using the helper function
         return {"labels": labels, "data": json_output}
     
@@ -62,6 +80,8 @@ def process_sm_power_data(sm_power_df: pd.DataFrame):
             "SM_A_datetime": sm_power_df['SM_A_datetime'],
             "SM_A_Minute": sm_power_df['SM_A_Minute']
         })
+        df_sm_power["Total Active Power"]=df_sm_power["R_kW"]+df_sm_power["Y_kW"]+df_sm_power[ "B_kW"]
+        df_sm_power.drop(columns=['R_kW', 'Y_kW', 'B_kW'], inplace=True)
         json_output = df_sm_power.to_dict(orient="records")
         labels = get_labels(df_sm_power)  # Extract labels using the helper function
         return {"labels": labels, "data": json_output}
@@ -86,7 +106,11 @@ def process_sm_voltage_data(sm_voltage_df: pd.DataFrame):
             "SM_A_Voltage_datetime": sm_voltage_df['SM_A_Voltage_datetime'],
             "SM_A_Voltage_Minute": sm_voltage_df['SM_A_Voltage_Minute']
         })
+        df_sm_voltage["Total Active Power"]=df_sm_voltage[  "R_Volt"]+df_sm_voltage[ "Y_Volt"]+df_sm_voltage["B_Volt"]
+        df_sm_voltage.drop(columns=["R_Volt","Y_Volt", "B_Volt"], inplace=True)
+        # return {sm_voltage_df.shape}
         json_output = df_sm_voltage.to_dict(orient="records")
+        return {df_sm_voltage.shape}
         labels = get_labels(df_sm_voltage)  # Extract labels using the helper function
         return {"labels": labels, "data": json_output}
     
@@ -110,7 +134,11 @@ def process_csa_voltage_data(csa_voltage_df: pd.DataFrame):
             "CSA_A_Voltage_datetime": csa_voltage_df['CSA_A_Voltage_datetime'],
             "CSA_A_Voltage_Minute": csa_voltage_df['CSA_A_Voltage_Minute']
         })
+
+        df_csa_voltage["Total Active Power"]=df_csa_voltage["R_Volt"]+df_csa_voltage["Y_Volt"]+df_csa_voltage[ "B_Volt"]
+        df_csa_voltage.drop(columns=['R_Volt', 'Y_Volt', 'B_Volt'], inplace=True)
         json_output = df_csa_voltage.to_dict(orient="records")
+        # return {csa_voltage_df.shape}
         labels = get_labels(df_csa_voltage)  # Extract labels using the helper function
         return {"labels": labels, "data": json_output}
     
@@ -134,7 +162,10 @@ def process_dese_voltage_data(dese_voltage_df: pd.DataFrame):
             "DESE_A_datetime": dese_voltage_df['DESE_A_Voltage_datetime'],
             "DESE_A_Voltage_Minute": dese_voltage_df['DESE_A_Voltage_Minute']
         })
+        df_dese_voltage["Total Active Power"]=df_dese_voltage["R_Volt"]+df_dese_voltage["Y_Volt"]+df_dese_voltage[ "B_Volt"]
+        df_dese_voltage.drop(columns=['R_Volt', 'Y_Volt', 'B_Volt'], inplace=True)
         json_output = df_dese_voltage.to_dict(orient="records")
+        # return {df_dese_voltage.shape}
         labels = get_labels(df_dese_voltage)  # Extract labels using the helper function
         return {"labels": labels, "data": json_output}
     
