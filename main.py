@@ -1,16 +1,21 @@
+from flask import Flask, render_template
 from dash import Dash
-from module.layout import create_layout
+from templates.layouts import create_layout
 from module.callbacks import register_callbacks
 
-# Initialize the app
-app = Dash(__name__)
+# Initialize Flask server
+server = Flask(__name__)
 
-# Set the layout
-app.layout = create_layout(app)
+# Initialize Dash app and attach to Flask server
+app = Dash(__name__, server=server)
+app.layout = create_layout()
 
 # Register callbacks
 register_callbacks(app)
 
-# Run the app
+@server.route('/')
+def index():
+    return render_template('index.html')
+
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8000)
+    server.run(debug=True,port=5000)

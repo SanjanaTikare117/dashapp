@@ -1,33 +1,55 @@
+import asyncio
 from dash import Input, Output
-from module.data_processing import preprocess_dataframe, combined_df
+import plotly.express as px
+import plotly.graph_objects as go
+from data_analysis.data_layer import DataFetcher
+from data_analysis.plotter import create_bar_plot, create_line_plot, create_heatmap
+
+
+# Instantiate the DataFetcher
+fetcher = DataFetcher()
 
 def register_callbacks(app):
-    @app.callback(
-        [Output('year-dropdown', 'options'),
-         Output('year-dropdown', 'value'),
-         Output('month-dropdown', 'options'),
-         Output('month-dropdown', 'value'),
-         Output('day-dropdown', 'options'),
-         Output('day-dropdown', 'value')],
-        [Input('building-dropdown', 'value'),
-         Input('parameter-dropdown', 'value')]
-    )
-    def update_dropdowns(building_name, parameter):
-        df_filtered = combined_df.copy()  # Placeholder for building filtering
-        year_options = [{'label': str(year), 'value': year} for year in df_filtered.index.year.unique()]
-        month_options = [{'label': month, 'value': month} for month in df_filtered.index.month_name().unique()]
-        day_options = [{'label': str(day), 'value': day} for day in df_filtered.index.day.unique()]
-        return year_options, year_options[0]['value'], month_options, month_options[0]['value'], day_options, day_options[0]['value']
 
     @app.callback(
-        [Output('bar-plot', 'figure'),
+        [Output('graph', 'figure'),
          Output('line-plot', 'figure'),
          Output('heatmap', 'figure')],
         [Input('year-dropdown', 'value'),
          Input('month-dropdown', 'value'),
          Input('day-dropdown', 'value'),
-         Input('parameter-dropdown', 'value')]
+         Input('parameter-dropdown', 'value'),
+         Input('building-dropdown', 'value')]
     )
-    def update_graphs(year, month, day, parameter):
-        # Add graph update logic based on the filtered data
-        pass
+    def update_graphs(year, month, day, parameter, building_name):
+        # Map building and parameter to source name and datetime column
+        source_mapping = {
+            'SM': {'Power': 'SM_Power', 'Voltage': 'SM_Voltage'},
+            'CSA': {'Power': 'CSA_Power', 'Voltage': 'CSA_Voltage'},
+            'DESE': {'Power': 'DESE_Power', 'Voltage': 'DESE_Voltage'}
+        }
+        
+        # Determine data source and datetime column based on selected building and parameter
+        source_name = source_mapping.get(building_name, {}).get(parameter.split()[1])
+        datetime_column = f"{building_name}_A_datetime"
+
+        # Asynchronously fetch and preprocess the data
+        data = asyncio.run(fetcher.fetch_and_process(source_name, datetime_column))
+        
+        if data is None:
+            # Return empty figures if data fetching failed
+            return go.Figure(), go.Figure(), go.Figure()
+
+        # Filter data by selected year, month, and day
+        df_filtered = data[
+            (data.index.year == year) & 
+            (data.index.month == month) & 
+            (data.index.day == day)
+        ]
+
+         # Create figures using the helper functions from plotter.py
+        bar_fig = create_bar_plot(df_filtered, parameter)
+        line_fig = create_line_plot(df_filtered, parameter)
+        heatmap_fig = create_heatmap(df_filtered, parameter)
+
+        return bar_fig, line_fig, heatmap_fig

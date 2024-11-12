@@ -56,7 +56,7 @@ def process_dese_power_data(dese_power_df: pd.DataFrame):
         df_dese_power["Total Active Power"]=df_dese_power["R_kW"]+df_dese_power["Y_kW"]+df_dese_power[ "B_kW"]
         df_dese_power.drop(columns=['R_kW', 'Y_kW', 'B_kW'], inplace=True)
         json_output = df_dese_power.to_dict(orient="records")
-        return {df_dese_power.shape}
+        # return {df_dese_power.shape}
         labels = get_labels(df_dese_power)  # Extract labels using the helper function
         return {"labels": labels, "data": json_output}
     
@@ -110,7 +110,7 @@ def process_sm_voltage_data(sm_voltage_df: pd.DataFrame):
         df_sm_voltage.drop(columns=["R_Volt","Y_Volt", "B_Volt"], inplace=True)
         # return {sm_voltage_df.shape}
         json_output = df_sm_voltage.to_dict(orient="records")
-        return {df_sm_voltage.shape}
+        # return {df_sm_voltage.shape}
         labels = get_labels(df_sm_voltage)  # Extract labels using the helper function
         return {"labels": labels, "data": json_output}
     
